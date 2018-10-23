@@ -26,9 +26,32 @@ def year_blocks(start, end):
     """
     rule = rrule.YEARLY
 
-    res = []
-    for day in rrule.rrule(rule, dtstart=start, until=end):
-        res.append(pd.Timestamp(day))
+    res = [pd.Timestamp(day)
+           for day in rrule.rrule(rule, dtstart=start, until=end)]
+    res.append(end)
+    res = sorted(set(res))
+    res = pairwise(res)
+    return res
+
+
+def day_blocks(start, end):
+    """
+    Create pairs of start and end with max a day in between, 
+    to deal with usage restrictions on the API
+
+    Parameters
+    ----------
+    start : dt.datetime | pd.Timestamp
+    end : dt.datetime | pd.Timestamp
+
+    Returns
+    -------
+    ((pd.Timestamp, pd.Timestamp))
+    """
+    rule = rrule.DAILY
+
+    res = [pd.Timestamp(day)
+           for day in rrule.rrule(rule, dtstart=start, until=end)]
     res.append(end)
     res = sorted(set(res))
     res = pairwise(res)
@@ -110,3 +133,20 @@ def year_limited(func):
         return df
 
     return year_wrapper
+
+
+def day_limited(func):
+    """Deals with calls where you cannot query more than a day, by splitting
+    the call up in blocks per day"""
+
+    @wraps(func)
+    def day_wrapper(*args, **kwargs):
+        start = kwargs.pop('start')
+        end = kwargs.pop('end')
+        blocks = day_blocks(start, end)
+        frames = [func(*args, start=_start, end=_end, **kwargs)
+                  for _start, _end in blocks]
+        df = pd.concat(frames)
+        return df
+
+    return day_wrapper

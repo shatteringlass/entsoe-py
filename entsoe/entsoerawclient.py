@@ -9,6 +9,7 @@ from .exceptions import NoMatchingDataError
 from .exceptions import PaginationError
 from .mappings import BIDDING_ZONES
 from .mappings import DOMAIN_MAPPINGS
+from .mappings import DOCUMENTTYPE
 
 URL = 'https://transparency.entsoe.eu/api'
 
@@ -93,6 +94,13 @@ class EntsoeRawClient:
             return response
 
     @staticmethod
+    def _endpoint_to_doctype(endpoint: str):
+        for (k, v) in DOCUMENTTYPE.items():
+            if v == endpoint:
+                return k
+        return None
+
+    @staticmethod
     def _datetime_to_str(dtm):
         """
         Convert a datetime object to a string in UTC
@@ -128,7 +136,7 @@ class EntsoeRawClient:
         """
         domain = BIDDING_ZONES[country_code]
         params = {
-            'documentType': 'A44',
+            'documentType': self._endpoint_to_doctype('Price Document'),
             'in_Domain': domain,
             'out_Domain': domain
         }
@@ -149,7 +157,7 @@ class EntsoeRawClient:
         """
         domain = BIDDING_ZONES[country_code]
         params = {
-            'documentType': 'A65',
+            'documentType': self._endpoint_to_doctype('System total load'),
             'processType': 'A16',
             'outBiddingZone_Domain': domain,
             'out_Domain': domain
@@ -179,7 +187,7 @@ class EntsoeRawClient:
             domain = BIDDING_ZONES[country_code]
 
         params = {
-            'documentType': 'A69',
+            'documentType': self._endpoint_to_doctype('Wind and solar forecast'),
             'processType': 'A01',
             'in_Domain': domain,
         }
@@ -211,7 +219,7 @@ class EntsoeRawClient:
             domain = BIDDING_ZONES[country_code]
 
         params = {
-            'documentType': 'A75',
+            'documentType': self._endpoint_to_doctype('Actual generation per type'),
             'processType': 'A16',
             'in_Domain': domain,
         }
@@ -237,7 +245,7 @@ class EntsoeRawClient:
         """
         domain = DOMAIN_MAPPINGS[country_code]
         params = {
-            'documentType': 'A68',
+            'documentType': self._endpoint_to_doctype('Installed generation per type'),
             'processType': 'A33',
             'in_Domain': domain,
         }
@@ -263,7 +271,7 @@ class EntsoeRawClient:
         domain_in = DOMAIN_MAPPINGS[country_code_to]
         domain_out = DOMAIN_MAPPINGS[country_code_from]
         params = {
-            'documentType': 'A11',
+            'documentType': self._endpoint_to_doctype('Aggregated energy data report'),
             'in_Domain': domain_in,
             'out_Domain': domain_out
         }
@@ -286,7 +294,7 @@ class EntsoeRawClient:
         """
         domain = DOMAIN_MAPPINGS[country_code]
         params = {
-            'documentType': 'A85',
+            'documentType': self._endpoint_to_doctype('Imbalance prices'),
             'controlArea_Domain': domain,
         }
         if psr_type:
@@ -314,7 +322,7 @@ class EntsoeRawClient:
         """
         domain = DOMAIN_MAPPINGS[country_code]
         params = {
-            'documentType': 'A77',
+            'documentType': self._endpoint_to_doctype('Production unavailability'),
             'biddingZone_domain': domain
             # ,'businessType': 'A53 (unplanned) | A54 (planned)'
         }
