@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup
 from .exceptions import NoMatchingDataError
 from .exceptions import PaginationError
 from .mappings import BIDDING_ZONES
-from .mappings import DOMAIN_MAPPINGS
 from .mappings import DOCUMENTTYPE
+from .mappings import DOMAIN_MAPPINGS
 
 URL = 'https://transparency.entsoe.eu/api'
 
@@ -346,3 +346,20 @@ class EntsoeRawClient:
         content = self.query_unavailability_of_generation_units(
             country_code=country_code, start=start, end=end, docstatus='A13')
         return content
+
+    def query_units(self, bz_domain, impementation_dt, start, end, psr_type=None):
+        """
+        """
+        domain = BIDDING_ZONES[bz_domain]
+        params = {
+            'documentType': self._endpoint_to_doctype('Configuration document'),
+            'biddingZone_domain': domain,
+            'businessType': 'B11'
+        }
+
+        if psr_type:
+            params['psrType'] = psr_type
+
+        response = self.base_request(params=params, start=start, end=end)
+
+        return response.content

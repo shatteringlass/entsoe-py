@@ -50,13 +50,8 @@ def day_blocks(start, end):
     """
     rule = rrule.DAILY
 
-    res = [pd.Timestamp(day)
+    return [pd.Timestamp(day)
            for day in rrule.rrule(rule, dtstart=start, until=end)]
-    res.append(end)
-    res = sorted(set(res))
-    res = pairwise(res)
-    return res
-
 
 def pairwise(iterable):
     """
@@ -144,8 +139,8 @@ def day_limited(func):
         start = kwargs.pop('start')
         end = kwargs.pop('end')
         blocks = day_blocks(start, end)
-        frames = [func(*args, start=_start, end=_end, **kwargs)
-                  for _start, _end in blocks]
+        frames = [func(*args, date=dt, **kwargs)
+                  for dt in blocks]
         df = pd.concat(frames)
         return df
 

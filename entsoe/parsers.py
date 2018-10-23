@@ -371,3 +371,7 @@ def _outage_parser(xml_file: bytes) -> pd.DataFrame:
             d.append(row + t)
     df = pd.DataFrame.from_records(d, columns=headers)
     return df
+
+
+def parse_units(xml):
+    return parse_generation(xml)

@@ -1,16 +1,18 @@
 import pandas as pd
 
+from .entsoerawclient import EntsoeRawClient
+from .mappings import BIDDING_ZONES
+from .mappings import TIMEZONE_MAPPINGS
+from .misc import day_limited
 from .misc import paginated
 from .misc import year_limited
-
-from .entsoerawclient import EntsoeRawClient
-from .mappings import TIMEZONE_MAPPINGS
 from .parsers import parse_crossborder_flows
 from .parsers import parse_generation
 from .parsers import parse_imbalance_prices
 from .parsers import parse_loads
 from .parsers import parse_prices
 from .parsers import parse_unavailabilities
+from .parsers import parse_units
 
 
 class EntsoePandasClient(EntsoeRawClient):
@@ -212,4 +214,18 @@ class EntsoePandasClient(EntsoeRawClient):
         """
         df = self.query_unavailability_of_generation_units(
             country_code=country_code, start=start, end=end, docstatus='A13')
+        return df
+
+    @day_limited
+    def query_units(self, bz_domain, start, end, psr_type=None):
+        """
+        """
+        content = super(EntsoePandasClient, self).query_units(
+            country_code=BIDDING_ZONES[bz_domain],
+            start=start, end=end, psr_type=psr_type)
+        df = parse_units(content).tz_convert(TIMEZONE_MAPPINGS[bz_domain])
+        df['start'] = df['start'].apply(
+            lambda x: x.tz_convert(TIMEZONE_MAPPINGS[bz_domain]))
+        df['end'] = df['end'].apply(
+            lambda x: x.tz_convert(TIMEZONE_MAPPINGS[bz_domain]))
         return df
