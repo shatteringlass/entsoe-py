@@ -1,8 +1,12 @@
 import bs4
 import pandas as pd
-from io import BytesIO
 import zipfile
-from .mappings import PSRTYPE_MAPPINGS, DOCSTATUS, BSNTYPE, BIDDING_ZONES
+
+from .mappings import BIDDING_ZONES
+from .mappings import BSNTYPE
+from .mappings import DOCSTATUS
+from .mappings import PSRTYPE_MAPPINGS
+from io import BytesIO
 
 
 def _extract_timeseries(xml_text):
@@ -305,17 +309,18 @@ def parse_unavailabilities(response: bytes) -> pd.DataFrame:
 
 
 def _available_period(timeseries: bs4.BeautifulSoup) -> list:
-    #if not timeseries:
+    # if not timeseries:
     #    return
     for period in timeseries.find_all('available_period'):
-        start, end = pd.Timestamp(period.timeinterval.start.text), pd.Timestamp(period.timeinterval.end.text)
+        start, end = pd.Timestamp(period.timeinterval.start.text), pd.Timestamp(
+            period.timeinterval.end.text)
         res = period.resolution.text
         pstn, qty = period.point.position.text, period.point.quantity.text
         yield [start, end, res, pstn, qty]
 
 
 def _unavailability_timeseries(soup: bs4.BeautifulSoup) -> list:
-    #if not ts:
+    # if not ts:
     #    return
     dm = {k: v for (v, k) in BIDDING_ZONES.items()}
     f = [BSNTYPE[soup.find('businesstype').text],
@@ -333,8 +338,8 @@ def _unavailability_timeseries(soup: bs4.BeautifulSoup) -> list:
 
 def _outage_parser(xml_file: bytes) -> pd.DataFrame:
     xml_text = xml_file.decode()
-    #if not(xml_text):
-        #return
+    # if not(xml_text):
+    # return
     headers = ['created_doc_time',
                'docstatus',
                'businesstype',

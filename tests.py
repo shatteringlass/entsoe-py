@@ -1,11 +1,16 @@
+import os
 import unittest
 
 import pandas as pd
+
 from bs4 import BeautifulSoup
 
-from entsoe import EntsoeRawClient, EntsoePandasClient
+from entsoe.entsoepandasclient import EntsoePandasClient
+from entsoe.entsoerawclient import EntsoeRawClient
 from entsoe.exceptions import NoMatchingDataError
-from settings import api_key
+
+api_key = os.environ.get('ENTSOE_API_KEY')
+
 
 class EntsoeRawClientTest(unittest.TestCase):
     @classmethod
@@ -102,6 +107,7 @@ class EntsoePandasClientTest(EntsoeRawClientTest):
 
     def test_query_unavailability_of_generation_units(self):
         pass
+
 
 if __name__ == '__main__':
     unittest.main()
